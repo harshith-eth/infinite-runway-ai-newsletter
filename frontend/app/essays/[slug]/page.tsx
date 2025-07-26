@@ -2,12 +2,37 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
 import { getBlogPostBySlug, getAllBlogPosts } from '@/lib/blog-data';
 import { getNewsletterBySlug, getAllNewsletters, newsletterToBlogPost } from '@/lib/newsletter-loader';
+
+// Simple markdown to HTML converter
+function convertMarkdownToHtml(markdown: string): string {
+  let html = markdown
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^\> (.*$)/gm, '<blockquote>$1</blockquote>')
+    .replace(/^\- (.*$)/gm, '<li>$1</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .split('\n')
+    .map(line => {
+      if (line.match(/^<[h123ul]/)) return line;
+      if (line.trim() === '') return '';
+      return `<p>${line}</p>`;
+    })
+    .join('\n')
+    .replace(/<p><\/p>/g, '');
+  
+  // Wrap consecutive <li> elements in <ul>
+  html = html.replace(/(<li>.*?<\/li>\s*)+/g, (match) => `<ul>${match}</ul>`);
+  
+  return html;
+}
 
 // Import React95 Sans Serif font - using CSS imports
 import '@react95/sans-serif';
@@ -32,9 +57,12 @@ export async function generateStaticParams() {
 }
 
 // Single blog post page component
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Await params first
+  const resolvedParams = await params;
+  
   // First try to find a newsletter by slug
-  const newsletter = await getNewsletterBySlug(params.slug);
+  const newsletter = await getNewsletterBySlug(resolvedParams.slug);
   
   if (newsletter) {
     // Render newsletter with MDX
@@ -155,15 +183,151 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                 <div className="bg-[#0618F3] p-6 text-white">
                   <div className="prose prose-invert max-w-none prose-p:text-base prose-p:leading-7 prose-p:my-3 prose-h1:text-2xl prose-h1:leading-9 prose-h2:text-xl prose-h2:leading-8 prose-h3:text-lg prose-h3:leading-7 prose-headings:mt-6 prose-headings:mb-3 prose-blockquote:border-l-4 prose-blockquote:border-white/30 prose-blockquote:bg-[#051ae0] prose-blockquote:px-6 prose-blockquote:py-2 prose-blockquote:not-italic">
                     <div 
-                      className="newsletter-content" 
+                      className="newsletter-content prose prose-invert max-w-none" 
                       style={{ 
                         fontFamily: "'Helvetica', Arial, sans-serif",
                         fontSize: "16px",
                         lineHeight: "24px"
                       }} 
-                    >
-                      <MDXRemote source={newsletter.content} />
+                      dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(newsletter.content) }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Window footer */}
+                <div className="bg-[#0618F3] p-3 flex items-center justify-center border-t border-white/20">
+                  <span className="text-sm text-white">© Infinite Runway</span>
+                </div>
+              </div>
+              
+              {/* Companies raising section */}
+              <div className="mb-8 border border-white/30 rounded-none">
+                {/* Window header */}
+                <div className="bg-[#0618F3] p-4 flex items-center border-b border-white/30">
+                  <span className="text-lg font-bold" style={{ fontSize: "20px", lineHeight: "30px" }}>Companies Raising</span>
+                </div>
+                
+                {/* Window content with blue background */}
+                <div className="bg-[#0618F3] py-5 px-6 text-white">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-white/20 pb-3">
+                      <div>
+                        <p className="text-lg">Acme AI</p>
+                        <p className="text-xs opacity-80">AI-powered customer service platform</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">$10M</p>
+                        <p className="text-xs opacity-80">Series A</p>
+                      </div>
                     </div>
+                    
+                    <div className="flex justify-between items-center border-b border-white/20 pb-3">
+                      <div>
+                        <p className="text-lg">Neural Systems</p>
+                        <p className="text-xs opacity-80">Brain-computer interfaces</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">$5M</p>
+                        <p className="text-xs opacity-80">Seed Round</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-lg">Quantum Leap</p>
+                        <p className="text-xs opacity-80">Practical quantum computing</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">$25M</p>
+                        <p className="text-xs opacity-80">Series B</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Companies hiring section */}
+              <div className="mb-8 border border-white/30 rounded-none">
+                {/* Window header */}
+                <div className="bg-[#0618F3] p-4 flex items-center border-b border-white/30">
+                  <span className="text-lg font-bold" style={{ fontSize: "20px", lineHeight: "30px" }}>Companies Hiring</span>
+                </div>
+                
+                {/* Window content with blue background */}
+                <div className="bg-[#0618F3] py-5 px-6 text-white">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-white/20 pb-3">
+                      <div>
+                        <p className="text-lg">TechVision</p>
+                        <p className="text-xs opacity-80">Computer vision ML engineers</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">Remote</p>
+                        <p className="text-xs opacity-80">$180-220K</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center border-b border-white/20 pb-3">
+                      <div>
+                        <p className="text-lg">DataStream</p>
+                        <p className="text-xs opacity-80">LLM fine-tuning specialists</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">SF / NYC</p>
+                        <p className="text-xs opacity-80">$160-210K</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-lg">NeuroCorp</p>
+                        <p className="text-xs opacity-80">AI research scientists</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">Hybrid</p>
+                        <p className="text-xs opacity-80">$190-250K</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Suggestion Box section */}
+              <div className="mb-8 border border-white/30 rounded-none">
+                {/* Window header */}
+                <div className="bg-[#0618F3] p-4 flex items-center border-b border-white/30">
+                  <span className="text-lg font-bold" style={{ fontSize: "20px", lineHeight: "30px" }}>Suggestion Box</span>
+                </div>
+                
+                {/* Window content with blue background */}
+                <div className="bg-[#0618F3] py-5 px-6 text-white">
+                  <p className="text-base mb-2">What'd you think of this email?</p>
+                  <p className="text-sm mb-4 opacity-80">You can add more feedback after choosing an option 👇🏽</p>
+                  
+                  <div className="flex justify-center gap-4 mb-5">
+                    <button className="flex flex-col items-center justify-center">
+                      <span className="text-2xl mb-1">👎</span>
+                      <span className="text-xs">Not great</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center">
+                      <span className="text-2xl mb-1">😐</span>
+                      <span className="text-xs">Neutral</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center">
+                      <span className="text-2xl mb-1">👍</span>
+                      <span className="text-xs">Good</span>
+                    </button>
+                    
+                    <button className="flex flex-col items-center justify-center">
+                      <span className="text-2xl mb-1">😍</span>
+                      <span className="text-xs">Loved it</span>
+                    </button>
+                  </div>
+                  
+                  <div className="text-center pt-2 border-t border-white/20">
+                    <p className="text-sm">Enjoyed this newsletter? <a href="#" className="underline hover:opacity-80">Forward it to a friend</a> and have them <a href="#" className="underline hover:opacity-80">signup here</a>.</p>
                   </div>
                 </div>
                 <div className="bg-[#0618F3] p-3 flex items-center justify-center border-t border-white/20">
@@ -180,7 +344,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   }
   
   // Fallback to old blog post system
-  const post = await getBlogPostBySlug(params.slug);
+  const post = await getBlogPostBySlug(resolvedParams.slug);
   
   // If neither found, return 404
   if (!post) {

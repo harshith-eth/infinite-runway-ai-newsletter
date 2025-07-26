@@ -3,9 +3,12 @@ import type { Metadata } from 'next';
 import { getBlogPostBySlug } from '@/lib/blog-data';
 
 // Generate metadata for each blog post based on slug
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  // Await params first
+  const resolvedParams = await params;
+  
   // Find post with matching slug
-  const post = await getBlogPostBySlug(params.slug);
+  const post = await getBlogPostBySlug(resolvedParams.slug);
   
   // Default metadata if post not found
   if (!post) {

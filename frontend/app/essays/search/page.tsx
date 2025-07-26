@@ -8,10 +8,11 @@ import { searchBlogPosts, BlogPost } from '@/lib/blog-data';
 export default async function SearchPage({ 
   searchParams 
 }: { 
-  searchParams: { q?: string } 
+  searchParams: Promise<{ q?: string }> 
 }) {
   // Get query from URL
-  const query = searchParams.q || '';
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q || '';
   
   // Search for posts matching the query
   const searchResults = await searchBlogPosts(query);

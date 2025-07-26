@@ -33,7 +33,7 @@ export interface NewsletterContent {
 }
 
 // Base path for newsletters
-const NEWSLETTERS_BASE_PATH = path.join(process.cwd(), 'frontend/app/essays');
+const NEWSLETTERS_BASE_PATH = path.join(process.cwd(), 'app/essays');
 
 // Get all newsletter folders recursively
 function getAllNewsletterPaths(): string[] {

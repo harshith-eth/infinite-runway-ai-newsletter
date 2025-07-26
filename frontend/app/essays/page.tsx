@@ -8,9 +8,10 @@ import { getPaginatedBlogPosts } from '@/lib/blog-data';
 // Configure pagination
 const BLOGS_PER_PAGE = 9;
 
-export default async function EssaysPage({ searchParams }: { searchParams: { page?: string } }) {
+export default async function EssaysPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   // Get page from URL params, default to 1
-  const currentPage = Number(searchParams.page) || 1;
+  const resolvedSearchParams = await searchParams;
+  const currentPage = Number(resolvedSearchParams.page) || 1;
   
   // Get paginated blog posts
   const { posts: currentBlogs, totalPages } = await getPaginatedBlogPosts(currentPage, BLOGS_PER_PAGE);
