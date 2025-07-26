@@ -79,7 +79,7 @@ export class NewsletterGenerator {
       
       const content = await azureOpenAI.generateNewsletterContent(contentRequest);
       
-      // 6. Generate image
+      // 6. Generate image with correct slug
       console.log('Generating newsletter image...');
       const imageUrl = await this.generateAndSaveImage(options.type, slug);
       
@@ -148,20 +148,45 @@ export class NewsletterGenerator {
   }
 
   private extractKeywords(articles: any[]): string[] {
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'ai', 'new', 'how', 'why', 'what'];
-    const keywords = new Set<string>();
+    // AI and tech-specific topic categorization (code-based, not prompt-based)
+    const topicCategories = {
+      'openai-gpt': ['openai', 'gpt', 'chatgpt', 'dall-e', 'sora', 'sam-altman'],
+      'google-ai': ['google', 'gemini', 'deepmind', 'bard', 'tensorflow'],
+      'meta-ai': ['meta', 'facebook', 'llama', 'pytorch', 'zuckerberg'],
+      'microsoft-ai': ['microsoft', 'copilot', 'azure', 'bing'],
+      'anthropic': ['anthropic', 'claude'],
+      'ai-funding': ['funding', 'investment', 'raised', 'valuation', 'series', 'billion'],
+      'ai-models': ['model', 'llm', 'transformer', 'neural', 'training'],
+      'computer-vision': ['vision', 'image', 'visual', 'cv', 'detection'],
+      'ai-tools': ['tool', 'platform', 'framework', 'api', 'sdk'],
+      'autonomous-ai': ['autonomous', 'self-driving', 'robotics', 'drone'],
+      'ai-healthcare': ['healthcare', 'medical', 'diagnosis', 'drug', 'pharma'],
+      'enterprise-ai': ['enterprise', 'business', 'corporate', 'saas'],
+      'ai-safety': ['safety', 'alignment', 'ethics', 'responsible'],
+      'quantum-ai': ['quantum', 'computing', 'qubits']
+    };
+
+    const topicScores: { [key: string]: number } = {};
     
+    // Score articles based on topic relevance
     articles.forEach((article: any) => {
-      const title = article.title?.toLowerCase() || '';
-      const words = title.split(/\s+/).filter((word: string) => 
-        word.length > 3 && 
-        !commonWords.includes(word) &&
-        /^[a-z]+$/.test(word)
-      );
-      words.slice(0, 2).forEach((word: string) => keywords.add(word));
+      const text = (article.title + ' ' + (article.content || '')).toLowerCase();
+      
+      Object.entries(topicCategories).forEach(([topic, keywords]) => {
+        const matches = keywords.filter(keyword => text.includes(keyword)).length;
+        if (matches > 0) {
+          topicScores[topic] = (topicScores[topic] || 0) + matches;
+        }
+      });
     });
+
+    // Return top 2-3 topics, clean up names
+    const topTopics = Object.entries(topicScores)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 2)
+      .map(([topic]) => topic.replace(/-ai$/, '').replace(/-/g, '-'));
     
-    return Array.from(keywords).slice(0, 5);
+    return topTopics.length > 0 ? topTopics : ['ai-weekly'];
   }
   
   private getNewsletterTitle(type: NewsletterType, date: Date, scrapedContent?: any[]): string {
@@ -217,10 +242,10 @@ export class NewsletterGenerator {
       const topic = this.getImageTopic(type);
       
       // Generate image with Azure OpenAI
-      const imageUrl = await azureOpenAI.generateNewsletterImage(topic, type);
+      const imageData = await azureOpenAI.generateNewsletterImage(topic, type);
       
-      // Download and save the image
-      const imagePath = await this.downloadAndSaveImage(imageUrl, slug);
+      // Save the image (either base64 or URL)
+      const imagePath = await this.downloadAndSaveImage(imageData, slug);
       
       console.log(`Image generated in ${(Date.now() - imageStartTime) / 1000} seconds`);
       
@@ -243,22 +268,30 @@ export class NewsletterGenerator {
     return topics[type];
   }
   
-  private async downloadAndSaveImage(url: string, filename: string): Promise<string> {
+  private async downloadAndSaveImage(imageData: string, filename: string): Promise<string> {
     try {
-      const axios = (await import('axios')).default;
-      const response = await axios.get(url, { responseType: 'arraybuffer' });
-      
-      const imagePath = path.join(process.cwd(), 'public', 'images', 'newsletters', `${filename}.png`);
+      const imagePath = path.join(process.cwd(), '..', 'frontend', 'public', 'images', 'newsletters', `${filename}.png`);
       
       // Ensure directory exists
       await fs.mkdir(path.dirname(imagePath), { recursive: true });
       
-      // Save image
-      await fs.writeFile(imagePath, response.data);
+      if (imageData.startsWith('data:image/png;base64,')) {
+        // Handle base64 data
+        const base64Data = imageData.replace('data:image/png;base64,', '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        await fs.writeFile(imagePath, buffer);
+        console.log(`✅ Saved base64 image: ${filename}.png`);
+      } else {
+        // Handle URL data
+        const axios = (await import('axios')).default;
+        const response = await axios.get(imageData, { responseType: 'arraybuffer' });
+        await fs.writeFile(imagePath, response.data);
+        console.log(`✅ Downloaded image from URL: ${filename}.png`);
+      }
       
       return imagePath;
     } catch (error) {
-      console.error('Error downloading image:', error);
+      console.error('Error saving image:', error);
       throw error;
     }
   }
@@ -296,7 +329,7 @@ export class NewsletterGenerator {
         day: 'numeric',
         year: 'numeric',
       }),
-      imageUrl: newsletter.imageUrl,
+      imageUrl: `/images/newsletters/${newsletter.slug}.png`,
       sponsor: newsletter.sponsorInfo ? {
         name: newsletter.sponsorInfo.name,
         logo: newsletter.sponsorInfo.logo,
@@ -319,16 +352,21 @@ export class NewsletterGenerator {
     const mdxPath = path.join(newsletterDir, 'page.mdx');
     await fs.writeFile(mdxPath, mdxContent);
     
-    // Copy a default thumbnail (you can update this to generate/download the actual image)
-    const thumbnailSource = path.join(process.cwd(), '..', 'frontend', 'public', 'images', 'thumbnail.svg');
-    const thumbnailDest = path.join(newsletterDir, 'thumbnail.svg');
+    // Copy the Azure OpenAI generated image (PNG format)
+    const generatedImageSource = path.join(process.cwd(), '..', 'frontend', 'public', 'images', 'newsletters', `${newsletter.slug}.png`);
+    const imageDest = path.join(newsletterDir, `${newsletter.slug}.png`);
+    
     try {
-      await fs.copyFile(thumbnailSource, thumbnailDest);
+      await fs.copyFile(generatedImageSource, imageDest);
+      console.log(`✅ Copied generated image: ${newsletter.slug}.png`);
     } catch (error) {
-      console.warn('Could not copy thumbnail, creating placeholder');
-      // Create a simple SVG placeholder if the source doesn't exist
-      const placeholderSvg = `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="400" fill="#f0f0f0"/><text x="300" y="200" text-anchor="middle" font-family="Arial" font-size="24">${newsletter.title}</text></svg>`;
-      await fs.writeFile(thumbnailDest, placeholderSvg);
+      console.warn('Could not copy generated image, creating placeholder');
+      // Create a simple SVG placeholder if the Azure image doesn't exist
+      const placeholderSvg = `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="600" height="400" fill="#1a1a2e"/>
+        <text x="300" y="200" text-anchor="middle" font-family="Arial" font-size="24" fill="white">${newsletter.title}</text>
+      </svg>`;
+      await fs.writeFile(path.join(newsletterDir, 'thumbnail.svg'), placeholderSvg);
     }
     
     console.log(`✅ Newsletter files created in: ${newsletterDir}`);
