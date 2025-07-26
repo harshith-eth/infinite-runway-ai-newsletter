@@ -30,7 +30,6 @@ export class NewsletterGenerator {
   async generate(options: GenerationOptions): Promise<Newsletter> {
     const startTime = Date.now();
     const date = options.date || new Date();
-    const slug = this.generateSlug(options.type, date);
     
     try {
       // 1. Notify start (skip for demo)
@@ -44,6 +43,10 @@ export class NewsletterGenerator {
       console.log('Scraping content...');
       const scrapedContent = await scraperService.scrapeForNewsletter(options.type);
       console.log(`Scraped ${scrapedContent.length} articles`);
+      
+      // 4. Generate dynamic slug based on content
+      const slug = this.generateSlug(options.type, date, scrapedContent);
+      console.log(`Generated slug: ${slug}`);
       
       // 4. Get sponsor information (use mock data for demo)
       console.log('Using mock sponsor information for demo...');
@@ -83,7 +86,7 @@ export class NewsletterGenerator {
       // 7. Create newsletter object
       const newsletter: Newsletter = {
         id: slug,
-        title: this.getNewsletterTitle(options.type, date),
+        title: this.getNewsletterTitle(options.type, date, scrapedContent),
         slug: slug,
         description: this.getNewsletterDescription(options.type),
         content: content,
@@ -132,12 +135,55 @@ export class NewsletterGenerator {
     }
   }
   
-  private generateSlug(type: NewsletterType, date: Date): string {
+  private generateSlug(type: NewsletterType, date: Date, scrapedContent?: any[]): string {
+    if (scrapedContent && scrapedContent.length > 0) {
+      // Extract key topics from top articles to create dynamic slug
+      const topArticles = scrapedContent.slice(0, 5);
+      const keywords = this.extractKeywords(topArticles);
+      const dynamicSlug = keywords.slice(0, 3).join('-').toLowerCase().replace(/[^a-z0-9-]/g, '');
+      return dynamicSlug || `ai-news-${date.toISOString().split('T')[0]}`;
+    }
     const dateStr = date.toISOString().split('T')[0];
     return `${type}-${dateStr}`;
   }
+
+  private extractKeywords(articles: any[]): string[] {
+    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'ai', 'new', 'how', 'why', 'what'];
+    const keywords = new Set<string>();
+    
+    articles.forEach((article: any) => {
+      const title = article.title?.toLowerCase() || '';
+      const words = title.split(/\s+/).filter((word: string) => 
+        word.length > 3 && 
+        !commonWords.includes(word) &&
+        /^[a-z]+$/.test(word)
+      );
+      words.slice(0, 2).forEach((word: string) => keywords.add(word));
+    });
+    
+    return Array.from(keywords).slice(0, 5);
+  }
   
-  private getNewsletterTitle(type: NewsletterType, date: Date): string {
+  private getNewsletterTitle(type: NewsletterType, date: Date, scrapedContent?: any[]): string {
+    if (scrapedContent && scrapedContent.length > 0) {
+      // Generate dynamic title based on top articles
+      const topArticles = scrapedContent.slice(0, 3);
+      const keywords = this.extractKeywords(topArticles);
+      
+      if (keywords.length > 0) {
+        const dynamicTitle = keywords.slice(0, 2).map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' & ');
+        
+        const dateStr = date.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        return `${dynamicTitle} Weekly - ${dateStr}`;
+      }
+    }
+    
     const titles = {
       'weekly-digest': 'Weekly AI Digest',
       'innovation-report': 'AI Innovation Report',

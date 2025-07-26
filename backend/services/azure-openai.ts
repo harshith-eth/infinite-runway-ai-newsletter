@@ -133,15 +133,15 @@ export class AzureOpenAIService {
     const prompts = {
       'weekly-digest': `You are an expert AI newsletter writer creating a comprehensive weekly digest for executives, investors, and tech leaders. 
       Your writing style is professional, insightful, and data-driven. You focus on strategic implications and business value.
-      Format the content in clean HTML with proper headings and paragraphs.`,
+      Format the content in CLEAN MARKDOWN with proper headings (##, ###) and paragraphs. NO HTML tags allowed.`,
       
       'innovation-report': `You are a technical AI newsletter writer creating content for developers, engineers, and technical professionals.
       Your writing style is technically accurate yet accessible, with practical examples and code snippets where relevant.
-      Focus on new tools, frameworks, and technical breakthroughs. Format in HTML with code blocks using <pre> tags.`,
+      Focus on new tools, frameworks, and technical breakthroughs. Format in CLEAN MARKDOWN with code blocks using backticks.`,
       
       'business-careers': `You are a business-focused AI newsletter writer creating content for professionals, job seekers, and entrepreneurs.
       Your writing style is practical, inspiring, and action-oriented. Focus on real-world applications and career opportunities.
-      Include actionable advice and success stories. Format in HTML with clear sections.`,
+      Include actionable advice and success stories. Format in CLEAN MARKDOWN with clear sections.`,
     };
     
     return prompts[type];
