@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build --workspace=frontend",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "backend/automation/generate-newsletter.ts": {
+      "runtime": "@vercel/node"
+    },
+    "backend/automation/send-emails.ts": {
+      "runtime": "@vercel/node"
+    },
+    "backend/automation/analytics.ts": {
+      "runtime": "@vercel/node"
+    },
+    "backend/automation/sponsor-manager.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/generate-newsletter",
+      "schedule": "0 10 * * 1,3,5"
+    },
+    {
+      "path": "/api/cron/weekly-analytics", 
+      "schedule": "0 18 * * 0"
+    },
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["iad1"],
+  "rewrites": [
+    {
+      "source": "/api/backend/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
+} 

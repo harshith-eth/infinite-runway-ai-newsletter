@@ -1,0 +1,43 @@
+{
+  "name": "infinite-runway-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "setup:db": "tsx scripts/setup-database.ts setup",
+    "setup:db:test": "tsx scripts/setup-database.ts test",
+    "setup:db:cleanup": "tsx scripts/setup-database.ts cleanup",
+    "validate:env": "tsx scripts/validate-environment.ts validate",
+    "validate:env:skip": "tsx scripts/validate-environment.ts validate --skip-connections",
+    "validate:db": "tsx scripts/validate-environment.ts check-db",
+    "generate:env": "tsx scripts/validate-environment.ts generate-env",
+    "generate:newsletter": "tsx automation/content-generator.ts",
+    "generate:test": "tsx automation/content-generator.ts weekly-digest --test",
+    "send:emails": "tsx automation/email-sender.ts",
+    "send:test": "tsx automation/email-sender.ts --test",
+    "update:status": "tsx automation/analytics.ts",
+    "health:check": "tsx automation/analytics.ts health-check",
+    "analytics:weekly": "tsx automation/analytics.ts weekly-summary",
+    "sponsors:reports": "tsx automation/sponsor-manager.ts weekly-reports",
+    "sponsors:report": "tsx automation/sponsor-manager.ts report"
+  },
+  "dependencies": {
+    "@linear/sdk": "^53.0.0",
+    "@slack/webhook": "^7.0.5",
+    "@supabase/supabase-js": "^2.52.1",
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.1",
+    "node-cron": "^4.2.1",
+    "resend": "^4.7.0",
+    "rss-parser": "^3.13.0",
+    "stripe": "^18.3.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+} 

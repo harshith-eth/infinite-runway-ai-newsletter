@@ -109,13 +109,13 @@ jobs:
           echo "🚀 Generating ${{ steps.newsletter-type.outputs.type }} newsletter..."
           
           if [ "${{ github.event.inputs.test_mode }}" == "true" ]; then
-            npx tsx automation/content-generator.ts ${{ steps.newsletter-type.outputs.type }} --test
+            npx tsx backend/automation/content-generator.ts ${{ steps.newsletter-type.outputs.type }} --test
           else
-            npx tsx automation/content-generator.ts ${{ steps.newsletter-type.outputs.type }}
+            npx tsx backend/automation/content-generator.ts ${{ steps.newsletter-type.outputs.type }}
           fi
           
           # Capture the generated newsletter ID from output
-          echo "newsletter_id=$(ls -t data/generated-newsletters/*.ts | head -1 | xargs basename | sed 's/.ts$//')" >> $GITHUB_OUTPUT
+          echo "newsletter_id=$(ls -t frontend/data/generated-newsletters/*.ts | head -1 | xargs basename | sed 's/.ts$//')" >> $GITHUB_OUTPUT
       
       - name: Commit generated newsletter
         if: success() && github.event.inputs.test_mode != 'true'
@@ -124,8 +124,8 @@ jobs:
           git config --global user.email 'bot@infiniterunway.com'
           
           # Add generated files
-          git add data/generated-newsletters/
-          git add public/images/newsletters/
+          git add frontend/data/generated-newsletters/
+          git add frontend/public/images/newsletters/
           
           # Check if there are changes to commit
           if git diff --staged --quiet; then
@@ -147,16 +147,16 @@ jobs:
           echo "📧 Sending newsletter emails..."
           
           if [ "${{ github.event.inputs.test_mode }}" == "true" ]; then
-            npx tsx automation/email-sender.ts ${{ steps.generate.outputs.newsletter_id }} --test --email=${{ env.ADMIN_EMAIL }}
+            npx tsx backend/automation/email-sender.ts ${{ steps.generate.outputs.newsletter_id }} --test --email=${{ env.ADMIN_EMAIL }}
           else
-            npx tsx automation/email-sender.ts ${{ steps.generate.outputs.newsletter_id }}
+            npx tsx backend/automation/email-sender.ts ${{ steps.generate.outputs.newsletter_id }}
           fi
       
       - name: Update status and analytics
         if: always()
         run: |
           echo "📊 Updating status..."
-          npx tsx automation/analytics.ts
+          npx tsx backend/automation/analytics.ts
       
       - name: Error notification
         if: failure()
@@ -218,7 +218,7 @@ jobs:
       - name: Generate weekly summary
         run: |
           echo "📊 Generating weekly analytics summary..."
-          npx tsx automation/analytics.ts weekly-summary
+          npx tsx backend/automation/analytics.ts weekly-summary
 
   health-check:
     runs-on: ubuntu-latest
@@ -241,7 +241,7 @@ jobs:
       - name: Run health check
         run: |
           echo "🏥 Running system health check..."
-          npx tsx automation/analytics.ts health-check
+          npx tsx backend/automation/analytics.ts health-check
       
       - name: Alert on failure
         if: failure()
