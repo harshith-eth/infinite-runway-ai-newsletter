@@ -1,4 +1,9 @@
 import { ContentGenerationRequest, Newsletter, NewsletterType } from '@/lib/types/newsletter.types';
+import { config } from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from .env.local
+config({ path: path.join(process.cwd(), '.env.local') });
 
 interface AzureOpenAIConfig {
   endpoint: string;

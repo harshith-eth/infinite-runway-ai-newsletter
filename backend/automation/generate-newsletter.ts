@@ -13,6 +13,10 @@ import { linearService } from '@/lib/services/linear';
 import { BlogPost } from '@/lib/types/blog.types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { config } from 'dotenv';
+
+// Load environment variables from .env.local
+config({ path: path.join(process.cwd(), '.env.local') });
 
 interface GenerationOptions {
   type: NewsletterType;
@@ -21,7 +25,7 @@ interface GenerationOptions {
 }
 
 export class NewsletterGenerator {
-  private readonly OUTPUT_DIR = path.join(process.cwd(), 'data', 'generated-newsletters');
+  private readonly OUTPUT_DIR = path.join(process.cwd(), '..', 'frontend', 'app', 'essays');
   
   async generate(options: GenerationOptions): Promise<Newsletter> {
     const startTime = Date.now();
@@ -29,36 +33,38 @@ export class NewsletterGenerator {
     const slug = this.generateSlug(options.type, date);
     
     try {
-      // 1. Notify start
-      await this.notifyStart(options.type, date);
+      // 1. Notify start (skip for demo)
+      console.log('Starting newsletter generation...');
       
-      // 2. Create Linear task
-      const linearTaskId = await linearService.createNewsletterTask({
-        newsletterId: slug,
-        title: this.getNewsletterTitle(options.type, date),
-        type: options.type,
-        scheduledDate: date,
-      });
+      // 2. Create Linear task (skip for demo)
+      console.log('Linear task creation skipped for demo');
+      const linearTaskId = null;
       
       // 3. Scrape content
       console.log('Scraping content...');
       const scrapedContent = await scraperService.scrapeForNewsletter(options.type);
       console.log(`Scraped ${scrapedContent.length} articles`);
       
-      // Update Linear with scraping metrics
-      if (linearTaskId) {
-        await linearService.updateTaskStatus({
-          taskId: linearTaskId,
-          comment: `Content scraping completed: ${scrapedContent.length} articles found`,
-        });
-      }
+      // 4. Get sponsor information (use mock data for demo)
+      console.log('Using mock sponsor information for demo...');
+      const sponsors = {
+        mainSponsor: {
+          id: "demo-sponsor-1",
+          name: "OpenAI",
+          logo: "/images/logos/startups/OpenAI.svg",
+          link: "https://openai.com",
+          description: "OpenAI is building safe AGI that benefits all of humanity. Join us in pushing the boundaries of what's possible with AI.",
+          ctaText: "Explore OpenAI",
+          ctaLink: "https://openai.com",
+          startDate: date,
+          endDate: new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days later
+        },
+        companiesRaising: [],
+        companiesHiring: []
+      };
       
-      // 4. Get sponsor information
-      console.log('Fetching sponsor information...');
-      const sponsors = await supabase.getActiveSponsorsForDate(date, options.type);
-      
-      // 5. Generate newsletter content
-      console.log('Generating newsletter content with AI...');
+      // 5. Generate newsletter content with Azure OpenAI
+      console.log('Generating newsletter content with Azure OpenAI...');
       const contentRequest: ContentGenerationRequest = {
         type: options.type,
         date: date,
@@ -99,36 +105,28 @@ export class NewsletterGenerator {
         },
       };
       
-      // 8. Save to database
-      console.log('Saving newsletter to database...');
-      const saved = await supabase.createNewsletter(newsletter);
+      // 8. Save to database (skip for demo)
+      console.log('Database save skipped for demo');
       
-      // 9. Generate TypeScript file for blog system
-      console.log('Creating blog post file...');
-      await this.createBlogPostFile(saved);
+      // 9. Generate files for essays system
+      console.log('Creating newsletter files in essays structure...');
+      await this.createBlogPostFile(newsletter);
       
-      // 10. Mark articles as used
-      const usedArticleIds = scrapedContent.slice(0, 20).map(a => a.id);
-      await scraperService.markArticlesAsUsed(usedArticleIds);
+      // 10. Mark articles as used (skip for demo)
+      console.log('Article marking skipped for demo');
       
-      // 11. Update Linear task
-      if (linearTaskId) {
-        await linearService.updateTaskStatus({
-          taskId: linearTaskId,
-          status: 'done',
-          description: `Newsletter generated successfully in ${(Date.now() - startTime) / 1000} seconds`,
-        });
-      }
+      // 11. Update Linear task (skip for demo)
+      console.log('Linear task update skipped for demo');
       
-      // 12. Notify completion
-      await this.notifyCompletion(saved, Date.now() - startTime);
+      // 12. Notify completion (skip for demo)
+      console.log('Slack notification skipped for demo');
       
-      return saved;
+      return newsletter;
     } catch (error) {
       console.error('Newsletter generation failed:', error);
       
-      // Notify failure
-      await this.notifyFailure(options.type, error);
+      // Notify failure (skip for demo)
+      console.log('Failure notification skipped for demo');
       
       throw error;
     }
@@ -220,20 +218,40 @@ export class NewsletterGenerator {
   }
   
   private async createBlogPostFile(newsletter: Newsletter): Promise<void> {
-    const blogPost: BlogPost = {
+    // Get current date for folder structure
+    const date = newsletter.publishDate;
+    const year = date.getFullYear();
+    const month = date.toLocaleDateString('en-US', { month: 'long' }).toLowerCase();
+    const weekNumber = this.getWeekNumber(date);
+    
+    // Create newsletter directory structure: /essays/2025/august/week-1/newsletter-title/
+    const newsletterDir = path.join(
+      this.OUTPUT_DIR, 
+      year.toString(), 
+      month, 
+      `week-${weekNumber}`, 
+      newsletter.slug
+    );
+    
+    // Ensure directory exists
+    await fs.mkdir(newsletterDir, { recursive: true });
+    
+    // Create metadata.json
+    const metadata = {
       title: newsletter.title,
       description: newsletter.description,
-      imageUrl: newsletter.imageUrl,
       slug: newsletter.slug,
-      authorName: newsletter.authorName,
-      authorImageUrl: newsletter.authorImageUrl,
+      author: {
+        name: "Savannah Pierce",
+        imageUrl: "/images/authors/savannah-pierce.png"
+      },
       publishDate: newsletter.publishDate.toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric',
       }),
-      content: newsletter.content,
-      sponsorInfo: newsletter.sponsorInfo ? {
+      imageUrl: newsletter.imageUrl,
+      sponsor: newsletter.sponsorInfo ? {
         name: newsletter.sponsorInfo.name,
         logo: newsletter.sponsorInfo.logo,
         link: newsletter.sponsorInfo.link,
@@ -241,32 +259,83 @@ export class NewsletterGenerator {
         ctaText: newsletter.sponsorInfo.ctaText,
         ctaLink: newsletter.sponsorInfo.ctaLink,
       } : undefined,
+      type: "newsletter",
+      week: weekNumber,
+      month: month,
+      year: year
     };
     
-    // Add companies raising and hiring sections to content
-    if (newsletter.companiesRaising && newsletter.companiesRaising.length > 0) {
-      blogPost.content += this.generateCompaniesRaisingHTML(newsletter.companiesRaising);
+    const metadataPath = path.join(newsletterDir, 'metadata.json');
+    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+    
+    // Create page.mdx with content
+    const mdxContent = newsletter.content;
+    const mdxPath = path.join(newsletterDir, 'page.mdx');
+    await fs.writeFile(mdxPath, mdxContent);
+    
+    // Copy a default thumbnail (you can update this to generate/download the actual image)
+    const thumbnailSource = path.join(process.cwd(), '..', 'frontend', 'public', 'images', 'thumbnail.svg');
+    const thumbnailDest = path.join(newsletterDir, 'thumbnail.svg');
+    try {
+      await fs.copyFile(thumbnailSource, thumbnailDest);
+    } catch (error) {
+      console.warn('Could not copy thumbnail, creating placeholder');
+      // Create a simple SVG placeholder if the source doesn't exist
+      const placeholderSvg = `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="400" fill="#f0f0f0"/><text x="300" y="200" text-anchor="middle" font-family="Arial" font-size="24">${newsletter.title}</text></svg>`;
+      await fs.writeFile(thumbnailDest, placeholderSvg);
     }
     
-    if (newsletter.companiesHiring && newsletter.companiesHiring.length > 0) {
-      blogPost.content += this.generateCompaniesHiringHTML(newsletter.companiesHiring);
-    }
+    console.log(`✅ Newsletter files created in: ${newsletterDir}`);
+  }
+  
+  private getWeekNumber(date: Date): number {
+    // Get the week number of the month (1-5)
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    const dayOfMonth = date.getDate();
+    const dayOfWeek = firstDay.getDay();
     
-    // Create TypeScript file content
-    const fileContent = `import { BlogPost } from '@/lib/blog-types';
+    return Math.ceil((dayOfMonth + dayOfWeek) / 7);
+  }
 
-export const ${this.toCamelCase(newsletter.slug)}: BlogPost = ${JSON.stringify(blogPost, null, 2)};
-`;
-    
-    // Ensure directory exists
-    await fs.mkdir(this.OUTPUT_DIR, { recursive: true });
-    
-    // Write file
-    const filePath = path.join(this.OUTPUT_DIR, `${newsletter.slug}.ts`);
-    await fs.writeFile(filePath, fileContent);
-    
-    // Update index file
-    await this.updateIndexFile(newsletter.slug);
+  private generateMockContent(type: NewsletterType, date: Date): string {
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+
+    return `# Welcome to ${this.getNewsletterTitle(type, date)}
+
+**Happy ${date.toLocaleDateString('en-US', { weekday: 'long' })}!**
+
+This week in AI has been absolutely incredible. Here's what caught our attention.
+
+## 🚀 This Week's Highlights
+
+### Major AI Breakthrough
+A new foundation model has been released that promises to revolutionize how we think about artificial intelligence capabilities.
+
+### Industry Movement  
+Several major tech companies announced significant AI investments, totaling over $2B in funding rounds.
+
+### Research Development
+Breakthrough research in multimodal AI systems shows promising results for real-world applications.
+
+## 💡 Key Insights
+
+The AI landscape continues to evolve rapidly, with new developments emerging daily. Here are the most important trends to watch:
+
+- **Enterprise Adoption**: Companies are increasingly integrating AI into core business processes
+- **Regulatory Framework**: New AI governance policies are being developed globally  
+- **Technical Innovation**: Advances in model efficiency and capabilities
+
+## 📈 What This Means
+
+For businesses and developers, these developments signal exciting opportunities ahead. The convergence of multiple AI technologies is creating unprecedented possibilities.
+
+---
+
+*Generated on ${dateStr}*`;
   }
   
   private generateCompaniesRaisingHTML(companies: any[]): string {
