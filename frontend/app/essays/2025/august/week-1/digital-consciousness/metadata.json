@@ -1,0 +1,23 @@
+{
+  "title": "Digital Consciousness",
+  "description": "1 idea, 2 resources, and 3 tools for this week.",
+  "slug": "digital-consciousness",
+  "author": {
+    "name": "Infinite Runway",
+    "imageUrl": "/images/authors/infinite-runway.png"
+  },
+  "publishDate": "November 26, 2023",
+  "imageUrl": "/images/thumbnail.svg",
+  "sponsor": {
+    "name": "OpenAI",
+    "logo": "/images/logos/startups/OpenAI.svg",
+    "link": "https://openai.com",
+    "description": "What does it mean for AI to approach consciousness? OpenAI is pushing the boundaries of what machines can understand and perceive. Explore the cutting edge with their powerful models.",
+    "ctaText": "Explore OpenAI Models",
+    "ctaLink": "https://openai.com/research"
+  },
+  "type": "newsletter",
+  "week": 1,
+  "month": "august",
+  "year": 2025
+} 

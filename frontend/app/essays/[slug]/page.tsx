@@ -2,10 +2,12 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
 import { getBlogPostBySlug, getAllBlogPosts } from '@/lib/blog-data';
+import { getNewsletterBySlug, getAllNewsletters, newsletterToBlogPost } from '@/lib/newsletter-loader';
 
 // Import React95 Sans Serif font - using CSS imports
 import '@react95/sans-serif';
@@ -16,21 +18,171 @@ const win95FontStyles = {
   letterSpacing: "0.5px"
 };
 
-// Generate static paths for all blog posts
+// Generate static paths for all blog posts and newsletters
 export async function generateStaticParams() {
   const posts = await getAllBlogPosts();
+  const newsletters = await getAllNewsletters();
   
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  const allSlugs = [
+    ...posts.map((post) => ({ slug: post.slug })),
+    ...newsletters.map((newsletter) => ({ slug: newsletter.metadata.slug }))
+  ];
+  
+  return allSlugs;
 }
 
 // Single blog post page component
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  // Find the blog post by slug
+  // First try to find a newsletter by slug
+  const newsletter = await getNewsletterBySlug(params.slug);
+  
+  if (newsletter) {
+    // Render newsletter with MDX
+    return (
+      <div className="min-h-screen overflow-x-hidden bg-[#0019fd] text-white">
+        <Header />
+        
+        <main className="flex-grow">
+          <div className="px-4 sm:px-6 pt-8">
+            <div className="mx-auto w-full max-w-2xl">
+              {/* Breadcrumb */}
+              <ul className="flex flex-wrap items-center gap-2 text-xs font-semibold mb-8">
+                <li className="flex items-center gap-2">
+                  <Link href="/" className="opacity-70 hover:opacity-100">Home</Link>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" height="14px">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+                  </svg>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Link href="/essays" className="opacity-70 hover:opacity-100">Essays</Link>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" height="14px">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+                  </svg>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="!opacity-100 truncate max-w-[200px]">{newsletter.metadata.title}</span>
+                </li>
+              </ul>
+              
+              {/* Newsletter header */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold" style={{ fontSize: "25px", lineHeight: "38px" }}>{newsletter.metadata.title}</h1>
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {newsletter.metadata.author.imageUrl ? (
+                      <div className="h-10 w-10 rounded-full overflow-hidden">
+                        <ImageWithFallback
+                          src={newsletter.metadata.author.imageUrl}
+                          alt={newsletter.metadata.author.name}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-blue-900 flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {newsletter.metadata.author.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                    <span className="text-base">{newsletter.metadata.author.name}</span>
+                  </div>
+                  <div className="text-sm opacity-80">
+                    <time dateTime={newsletter.metadata.publishDate}>{newsletter.metadata.publishDate}</time>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Feature image */}
+              <div className="mb-8">
+                <div className="aspect-video w-full overflow-hidden rounded-none border border-white/30 bg-[#0019fd]/50">
+                  <ImageWithFallback
+                    src={newsletter.metadata.imageUrl}
+                    alt={newsletter.metadata.title}
+                    width={1200}
+                    height={675}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Sponsor section */}
+              {newsletter.metadata.sponsor && (
+                <div className="mb-8">
+                  <div className="w-full border border-white/30 rounded-none">
+                    <div className="bg-[#0618F3] p-6 flex flex-col items-center justify-center border-b border-white/30">
+                      <span className="text-sm font-bold wt-header-font mb-3">In Partnership with</span>
+                      <a 
+                        href={newsletter.metadata.sponsor.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="h-12 w-auto"
+                      >
+                        <Image
+                          src={newsletter.metadata.sponsor.logo}
+                          alt={newsletter.metadata.sponsor.name}
+                          width={180}
+                          height={54}
+                          className="h-12 w-auto"
+                        />
+                      </a>
+                    </div>
+                    <div className="bg-[#0618F3] p-4 text-white">
+                      <div className="text-base mb-8 whitespace-pre-line" style={{ fontSize: "16px", lineHeight: "24px" }}>
+                        {newsletter.metadata.sponsor.description}
+                      </div>
+                      <div className="flex justify-center mb-4">
+                        <a 
+                          href={newsletter.metadata.sponsor.ctaLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="border font-medium focus:outline-none focus:border-transparent inline-flex items-center whitespace-nowrap transition-colors duration-200 focus:ring-1 bg-white text-[#0618F3] border-white shadow-sm hover:bg-white/90 focus:ring-white justify-center rounded-md py-2 px-4 text-sm"
+                        >
+                          {newsletter.metadata.sponsor.ctaText}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Newsletter content in Windows 95 style */}
+              <div className="mb-8 border border-white/30">
+                <div className="bg-[#0618F3] p-4 flex items-center border-b border-white/30">
+                  <span className="text-lg font-bold" style={{ fontSize: "20px", lineHeight: "30px" }}>{newsletter.metadata.title}</span>
+                </div>
+                <div className="bg-[#0618F3] p-6 text-white">
+                  <div className="prose prose-invert max-w-none prose-p:text-base prose-p:leading-7 prose-p:my-3 prose-h1:text-2xl prose-h1:leading-9 prose-h2:text-xl prose-h2:leading-8 prose-h3:text-lg prose-h3:leading-7 prose-headings:mt-6 prose-headings:mb-3 prose-blockquote:border-l-4 prose-blockquote:border-white/30 prose-blockquote:bg-[#051ae0] prose-blockquote:px-6 prose-blockquote:py-2 prose-blockquote:not-italic">
+                    <div 
+                      className="newsletter-content" 
+                      style={{ 
+                        fontFamily: "'Helvetica', Arial, sans-serif",
+                        fontSize: "16px",
+                        lineHeight: "24px"
+                      }} 
+                    >
+                      <MDXRemote source={newsletter.content} />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#0618F3] p-3 flex items-center justify-center border-t border-white/20">
+                  <span className="text-sm text-white">© Infinite Runway</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
+  
+  // Fallback to old blog post system
   const post = await getBlogPostBySlug(params.slug);
   
-  // If post not found, return 404
+  // If neither found, return 404
   if (!post) {
     notFound();
   }

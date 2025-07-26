@@ -1,0 +1,23 @@
+{
+  "title": "AI Mirror",
+  "description": "1 idea, 2 resources, and 3 tools for this week.",
+  "slug": "ai-mirror",
+  "author": {
+    "name": "Infinite Runway",
+    "imageUrl": "/images/authors/infinite-runway.png"
+  },
+  "publishDate": "December 10, 2023",
+  "imageUrl": "/images/thumbnail.svg",
+  "sponsor": {
+    "name": "OpenAI",
+    "logo": "/images/logos/startups/OpenAI.svg",
+    "link": "https://openai.com",
+    "description": "Alright, I'll admit it. I used to be a DocuSign guy until I realized I was paying hundreds of dollars per month simply to send and receive signed documents. Then I found Agree.com.\n\nAgree made e-signature free for everyone… and then loaded the platform with killer features like automated invoicing, integrated payments, and revenue recovery.\n\nNow I can send, sign, and get paid—all in one place. No more waiting around for checks or jumping between apps. Agree.com doesn't just save me hundreds of dollars every month; it gets me to the good part faster: seeing money hit my account.\n\nAs a founder myself, I gotta say my favorite part about Agree.com is that their founders are accessible and dialed in to making the product 10x better than the alternative.\n\nI already know you're smart because you read Big Desk Energy. Now you can show others that you're smart because you send contracts with Agree.\n\nUsing Agree.com is an IQ test.",
+    "ctaText": "Start Creating with DALL·E",
+    "ctaLink": "https://openai.com/dall-e-3"
+  },
+  "type": "newsletter",
+  "week": 1,
+  "month": "august",
+  "year": 2025
+} 

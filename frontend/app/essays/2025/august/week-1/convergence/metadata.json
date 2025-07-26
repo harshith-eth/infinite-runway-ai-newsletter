@@ -1,0 +1,23 @@
+{
+  "title": "Convergence",
+  "description": "Why the future isn't just fast — it's exponential.",
+  "slug": "convergence",
+  "author": {
+    "name": "Infinite Runway",
+    "imageUrl": "/images/authors/infinite-runway.png"
+  },
+  "publishDate": "December 3, 2023",
+  "imageUrl": "/images/convergence.svg",
+  "sponsor": {
+    "name": "OpenAI",
+    "logo": "/images/logos/startups/OpenAI.svg",
+    "link": "https://openai.com",
+    "description": "OpenAI is at the forefront of the AI revolution. Their GPT-4 model represents exactly the type of convergent technology we discuss in this essay—combining linguistic understanding, reasoning, and knowledge into a single system.",
+    "ctaText": "Try ChatGPT Today",
+    "ctaLink": "https://chat.openai.com/"
+  },
+  "type": "newsletter",
+  "week": 1,
+  "month": "august", 
+  "year": 2025
+} 
