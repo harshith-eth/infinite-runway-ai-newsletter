@@ -1,0 +1,10 @@
+{
+  "cursor.cpp.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "cursor.chat.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "cursor.general.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "cursor.predict.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "cursor.compose.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "anthropic.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "claude.model": "us.anthropic.claude-opus-4-20250514-v1:0",
+  "ai.defaultModel": "us.anthropic.claude-opus-4-20250514-v1:0"
+} 

@@ -1,0 +1,278 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 238 96% 49%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 240 94% 52%;
+    --radius: 0;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 238 96% 49%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 240 94% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    @apply bg-background text-foreground;
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior-y: none; /* Prevents overscroll/bounce effect */
+  }
+}
+
+/* Utility class to hide scrollbars */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+:root {
+  --wt-primary-color: #0019fd;
+  --wt-text-on-primary-color: #0019fd;
+
+  --wt-secondary-color: #ffffff;
+  --wt-text-on-secondary-color: #f4f5ff;
+
+  --wt-tertiary-color: #FFFFFF;
+  --wt-text-on-tertiary-color: #222222;
+
+  --wt-background-color: #0019fd;
+  --wt-text-on-background-color: #f4f5ff;
+
+  --wt-subscribe-background-color: #0019fd;
+  --wt-text-on-subscribe-background-color: #f4f5ff;
+
+  --wt-header-font: "Google Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,"Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --wt-body-font: "Google Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --wt-button-font: "Google Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --wt-border-radius: 0px
+}
+
+.bg-wt-primary { background-color: var(--wt-primary-color); }
+.text-wt-primary { color: var(--wt-primary-color); }
+.border-wt-primary { border-color: var(--wt-primary-color); }
+
+.bg-wt-text-on-primary { background-color: var(--wt-text-on-primary-color); }
+.text-wt-text-on-primary { color: var(--wt-text-on-primary-color); }
+.border-wt-text-on-primary { border-color: var(--wt-text-on-primary-color); }
+
+.bg-wt-secondary { background-color: var(--wt-secondary-color); }
+.text-wt-secondary { color: var(--wt-secondary-color); }
+.border-wt-secondary { border-color: var(--wt-secondary-color); }
+
+.bg-wt-text-on-secondary { background-color: var(--wt-text-on-secondary-color); }
+.text-wt-text-on-secondary { color: var(--wt-text-on-secondary-color); }
+.border-wt-text-on-secondary { border-color: var(--wt-text-on-secondary-color); }
+
+.bg-wt-tertiary { background-color: var(--wt-tertiary-color); }
+.text-wt-tertiary { color: var(--wt-tertiary-color); }
+.border-wt-tertiary { border-color: var(--wt-tertiary-color); }
+
+.bg-wt-text-on-tertiary { background-color: var(--wt-text-on-tertiary-color); }
+.text-wt-text-on-tertiary { color: var(--wt-text-on-tertiary-color); }
+.border-wt-text-on-tertiary { border-color: var(--wt-text-on-tertiary-color); }
+
+.bg-wt-background { background-color: var(--wt-background-color); }
+.text-wt-background { color: var(--wt-background-color); }
+.border-wt-background { border-color: var(--wt-background-color); }
+
+.bg-wt-text-on-background { background-color: var(--wt-text-on-background-color); }
+.text-wt-text-on-background { color: var(--wt-text-on-background-color); }
+.border-wt-text-on-background { border-color: var(--wt-text-on-background-color); }
+
+.bg-wt-subscribe-background { background-color: var(--wt-subscribe-background-color); }
+.text-wt-subscribe-background { color: var(--wt-subscribe-background-color); }
+.border-wt-subscribe-background { border-color: var(--wt-subscribe-background-color); }
+
+.bg-wt-text-on-subscribe-background { background-color: var(--wt-text-on-subscribe-background-color); }
+.text-wt-text-on-subscribe-background { color: var(--wt-text-on-subscribe-background-color); }
+.border-wt-text-on-subscribe-background { border-color: var(--wt-text-on-subscribe-background-color); }
+
+.rounded-wt { border-radius: var(--wt-border-radius); }
+
+.wt-header-font { font-family: var(--wt-header-font); }
+.wt-body-font { font-family: var(--wt-body-font); }
+.wt-button-font { font-family: var(--wt-button-font); }
+
+input:focus { --tw-ring-color: transparent !important; }
+
+li a { word-break: break-word; }
+
+@media only screen and (max-width:667px) {
+  .mob-stack {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .mob-w-full {
+    width: 100% !important;
+  }
+  
+  /* Improved spacing for mobile */
+  h1, h2, h3 {
+    word-break: break-word;
+  }
+  
+  .logo-carousel {
+    animation-duration: 30s !important; /* Faster animation on mobile */
+  }
+}
+
+/* Additional responsive helpers */
+@media only screen and (max-width: 480px) {
+  .xs-text-center {
+    text-align: center !important;
+  }
+  
+  .xs-hidden {
+    display: none !important;
+  }
+  
+  .xs-px-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 60s linear infinite;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+  }
+  .animate-marquee-reverse {
+    animation: marquee-reverse 60s linear infinite;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Add will-change property to optimize the animation */
+.logo-carousel {
+  will-change: transform;
+}
+
+/* No transition flicker fix */
+.logo-carousel-container {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Windows 95 Font Faces */
+@font-face {
+  font-family: 'R95 Sans Serif 8pt';
+  font-style: normal;
+  font-display: swap;
+  font-weight: normal;
+  src: url('/fonts/sources/8pt/R95 Sans serif 8pt.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'R95 Sans Serif 10pt';
+  font-style: normal;
+  font-display: swap;
+  font-weight: normal;
+  src: url('/fonts/sources/10pt/R95 Sans serif 10pt.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'R95 Sans Serif 12pt';
+  font-style: normal;
+  font-display: swap;
+  font-weight: normal;
+  src: url('/fonts/sources/12pt/R95 Sans serif 12pt.ttf') format('truetype');
+}
+
+/* Windows 95 specific classes */
+.win95-font {
+  font-family: 'R95 Sans Serif 8pt', 'MS Sans Serif', 'Pixelated MS Sans Serif', Arial, sans-serif !important;
+  letter-spacing: 0.5px;
+}
+
+.win95-title-bar {
+  background-color: #000080;
+  color: white;
+  font-family: 'R95 Sans Serif 8pt', 'MS Sans Serif', 'Pixelated MS Sans Serif', Arial, sans-serif !important;
+  font-weight: bold;
+  padding: 4px;
+}
+
+/* Minimal scrollbar styling */
+body {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent !important;
+}
+
+body::-webkit-scrollbar {
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.5) !important;
+  border-radius: 4px !important;
+}

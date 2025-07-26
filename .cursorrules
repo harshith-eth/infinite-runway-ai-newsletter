@@ -1,0 +1,11 @@
+# Cursor Configuration
+# Claude Model Configuration
+model: us.anthropic.claude-opus-4-20250514-v1:0
+
+# Additional settings for Claude Opus
+temperature: 0.7
+max_tokens: 4096
+
+# Project-specific instructions
+You are working on a Next.js project called "Infinite Runway" - a blog/content platform.
+Always use the specified Claude model for consistency and optimal performance. 
