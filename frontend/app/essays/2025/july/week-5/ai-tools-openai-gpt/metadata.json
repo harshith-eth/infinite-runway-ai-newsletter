@@ -1,0 +1,23 @@
+{
+  "title": "Ai-tools & Openai-gpt Weekly - July 27",
+  "description": "The latest AI tools, research, and technical breakthroughs",
+  "slug": "ai-tools-openai-gpt",
+  "author": {
+    "name": "Savannah Pierce",
+    "imageUrl": "/images/authors/savannah-pierce.png"
+  },
+  "publishDate": "July 27, 2025",
+  "imageUrl": "/images/newsletters/ai-tools-openai-gpt.png",
+  "sponsor": {
+    "name": "OpenAI",
+    "logo": "/images/logos/startups/OpenAI.svg",
+    "link": "https://openai.com",
+    "description": "OpenAI is building safe AGI that benefits all of humanity. Join us in pushing the boundaries of what's possible with AI.",
+    "ctaText": "Explore OpenAI",
+    "ctaLink": "https://openai.com"
+  },
+  "type": "newsletter",
+  "week": 5,
+  "month": "july",
+  "year": 2025
+}
